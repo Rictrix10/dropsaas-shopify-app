@@ -1,0 +1,74 @@
+query getOrderDetails($id: ID!) {
+  order(id: $id) {
+    id
+    name
+    createdAt
+    # Dados do Cliente
+    customer {
+      email
+      firstName
+      lastName
+    }
+    displayFinancialStatus
+    displayFulfillmentStatus
+    cancelledAt
+    cancelReason
+    totalPriceSet {
+      shopMoney {
+        amount
+        currencyCode
+      }
+    }
+    fulfillments {
+      id
+      status
+      trackingInfo {
+        number
+        url
+        company
+      }
+    }
+    lineItems(first: 5) {
+      edges {
+        node {
+          title
+          quantity
+          sku
+        }
+      }
+    }
+  }
+}
+
+
+{
+  "id": "gid://shopify/Order/6822840303705"
+}
+
+
+---------------------------------------------
+
+query getCustomerDetails($id: ID!) {
+  customer(id: $id) {
+    id
+    firstName
+    lastName
+    email
+    # Opcional: Podes também ver as últimas encomendas deste cliente
+    orders(first: 5) {
+      edges {
+        node {
+          id
+          name
+          displayFulfillmentStatus
+        }
+      }
+    }
+  }
+}
+
+{
+  "id": "gid://shopify/Customer/9068940787801"
+}
+
+
