@@ -2,14 +2,14 @@
 
 client_id = "adc1b15bae96290aba407442c7c7dcff"
 name = "dropsaas-app"
-application_url = "https://gods-equilibrium-answering-international.trycloudflare.com "
+application_url = "https://securities-martin-glance-mesh.trycloudflare.com"
 embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
 
 [webhooks]
-api_version = "2026-04"
+api_version = "2024-04"
 
   [[webhooks.subscriptions]]
   topics = [ "app/uninstalled" ]
@@ -23,9 +23,23 @@ api_version = "2026-04"
   topics = [ "orders/create", "orders/updated" ]
   uri = "/webhooks/orders"
 
+  [[webhooks.subscriptions]]
+  topics = [ "fulfillments/create", "fulfillments/update" ]
+  uri = "/webhooks/fulfillments"
+
+  [[webhooks.subscriptions]]
+  topics = [ "fulfillment_events/create" ]
+  uri = "/webhooks/fulfillment-events"
+
+  [[webhooks.subscriptions]]
+  topics = [ "orders/fulfilled", "orders/partially_fulfilled" ]
+  uri = "/webhooks/orders/fulfillment"
+
+
 [access_scopes]
 # Learn more at https://gods-equilibrium-answering-international.trycloudflare.com 
-scopes = "write_products,read_orders,write_orders"
+scopes = "write_products,read_orders,write_orders,read_fulfillments,write_fulfillments"
+
 
 [auth]
-redirect_urls = [ "https://gods-equilibrium-answering-international.trycloudflare.com /auth/callback" ]
+redirect_urls = [ "https://securities-martin-glance-mesh.trycloudflare.com/auth/callback" ]
