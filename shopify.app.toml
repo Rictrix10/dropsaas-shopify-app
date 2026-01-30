@@ -2,7 +2,7 @@
 
 client_id = "adc1b15bae96290aba407442c7c7dcff"
 name = "dropsaas-app"
-application_url = "https://securities-martin-glance-mesh.trycloudflare.com"
+application_url = "https://measures-writer-photography-plugin.trycloudflare.com"
 embedded = true
 
 [build]
@@ -12,34 +12,34 @@ automatically_update_urls_on_dev = true
 api_version = "2024-04"
 
   [[webhooks.subscriptions]]
-  topics = [ "app/uninstalled" ]
-  uri = "/webhooks/app/uninstalled"
-
-  [[webhooks.subscriptions]]
-  topics = [ "app/scopes_update", "products/create", "products/update" ]
-  uri = "/webhooks/products"
+  topics = [ "orders/fulfilled", "orders/partially_fulfilled" ]
+  uri = "/webhooks/orders/fulfillment"
 
   [[webhooks.subscriptions]]
   topics = [ "orders/create", "orders/updated" ]
   uri = "/webhooks/orders"
 
   [[webhooks.subscriptions]]
-  topics = [ "fulfillments/create", "fulfillments/update" ]
-  uri = "/webhooks/fulfillments"
-
-  [[webhooks.subscriptions]]
   topics = [ "fulfillment_events/create" ]
   uri = "/webhooks/fulfillment-events"
 
   [[webhooks.subscriptions]]
-  topics = [ "orders/fulfilled", "orders/partially_fulfilled" ]
-  uri = "/webhooks/orders/fulfillment"
+  topics = [ "app/uninstalled" ]
+  uri = "/webhooks/app/uninstalled"
 
+  [[webhooks.subscriptions]]
+  topics = [ "fulfillments/create", "fulfillments/update" ]
+  uri = "/webhooks/fulfillments"
+
+  [[webhooks.subscriptions]]
+  topics = [ "products/create", "products/update", "app/scopes_update" ]
+  uri = "/webhooks/products"
 
 [access_scopes]
-# Learn more at https://gods-equilibrium-answering-international.trycloudflare.com 
-scopes = "write_products,read_orders,write_orders,read_fulfillments,write_fulfillments"
-
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_fulfillments,read_orders,write_fulfillments,write_orders,write_products"
 
 [auth]
-redirect_urls = [ "https://securities-martin-glance-mesh.trycloudflare.com/auth/callback" ]
+redirect_urls = [
+  "https://measures-writer-photography-plugin.trycloudflare.com/auth/callback"
+]

@@ -136,19 +136,35 @@ serve(async (req: Request) => {
     const topic = req.headers.get('x-shopify-topic');
     const shopDomain = req.headers.get('x-shopify-shop-domain');
 
-    if (!hmacHeader || !topic || !shopDomain) {
-      return new Response('Bad Request: Missing headers', { status: 400 });
+    if (!topic || !shopDomain) {
+      return new Response('Bad Request: Missing topic or shop domain', { status: 400 });
     }
 
     const bodyText = await req.text();
 
-    const isValid = await verifyShopifyHmac(
-      bodyText,
-      shopifySecret,
-      hmacHeader,
-    );
+    // Estratégia de Autenticação Híbrida:
+    // 1. Se vier com Authorization: Bearer SERVICE_KEY, confiamos (vem do nosso backend Remix).
+    // 2. Se não, tentamos validar o HMAC da Shopify (chamada direta da Shopify, se configurado assim).
+
+    let isValid = false;
+    const authHeader = req.headers.get('Authorization');
+    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+
+    // Verificação via Service Role Key (Trusted Source)
+    if (authHeader && serviceRoleKey && authHeader === `Bearer ${serviceRoleKey}`) {
+      console.log("Authenticated via Service Role Key (Trusted Proxy)");
+      isValid = true;
+    } else {
+      // Fallback: Tentativa de validação HMAC
+      if (shopifySecret && hmacHeader) {
+        isValid = await verifyShopifyHmac(bodyText, shopifySecret, hmacHeader);
+      } else {
+        console.warn("Missing credentials for HMAC check and no Service Key provided");
+      }
+    }
 
     if (!isValid) {
+      console.error("Authentication failed. Invalid HMAC or missing Service Key.");
       return new Response('Unauthorized', { status: 401 });
     }
 
