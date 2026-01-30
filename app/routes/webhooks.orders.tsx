@@ -30,38 +30,37 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         console.log(JSON.stringify(payload, null, 2));
 
 
-        // Extrair o store_id sem o domínio
-        const storeId = shop.split(".")[0];
-        console.log("Extracted storeId:", storeId);
+        console.log(`Webhook autenticado! Tópico: ${topic}, Loja: ${shop}`);
 
-        // Obter a store do Supabase pelo store ID
-        const store = await getStoreByShopId(storeId);
-        console.log("Store lookup result:", store);
+        // Encaminhar para a Edge Function de Orders
+        const edgeFunctionUrl = "https://zozipovqpcegezhbvvsg.supabase.co/functions/v1/order-webhook-handler";
 
-        if (!store) {
-            console.error(`Store não encontrada: ${storeId}`);
-            return new Response("Store not found", { status: 404 });
+        // Preparar headers
+        const originalBody = rawBody;
+        const hmacHeader = clonedRequest.headers.get("X-Shopify-Hmac-Sha256");
+        const topicHeader = clonedRequest.headers.get("X-Shopify-Topic") || topic;
+        const shopDomainHeader = clonedRequest.headers.get("X-Shopify-Shop-Domain") || shop;
+
+        const response = await fetch(edgeFunctionUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-Shopify-Topic": topicHeader,
+                "X-Shopify-Shop-Domain": shopDomainHeader,
+                "Authorization": `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`
+            },
+            body: originalBody
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("Erro na Edge Function (Orders):", errorText);
+            // Retorna 200 para não travar a fila da Shopify, mas loga o erro
+            return new Response("Edge Function Error", { status: 200 });
         }
 
-        console.log("Store found with ID:", store.id, "User ID:", store.user_id);
-
-        // Processar eventos de pedidos
-        if (topic === "ORDERS_CREATE") {
-            console.log("Order created:", payload.id);
-            console.log("Webhook topic:", topic);
-            console.log("Order ID:", payload.id);
-            console.log("Customer email:", payload.email);
-            console.log("Customer name:", payload.customer?.first_name, payload.customer?.last_name);
-            console.log("Payload size:", rawBody.length);
-            await saveOrder(store.id, payload, store.user_id);
-            console.log(`Pedido criado: ${payload.id}`);
-        } else if (topic === "ORDERS_UPDATED") {
-            console.log("Order updated:", payload.id);
-            // await updateOrder(store.id, payload);
-            console.log(`Pedido atualizado: ${payload.id}`);
-        } else {
-            console.log("Topic not recognized for order save:", topic);
-        }
+        const result = await response.text();
+        console.log("Sucesso na Edge Function (Orders):", result);
 
         return new Response("OK", { status: 200 });
     } catch (error) {
