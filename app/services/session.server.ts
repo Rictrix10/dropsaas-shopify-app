@@ -70,7 +70,7 @@ export class SupabaseSessionStorage {
             const session = new Session({
                 id,
                 shop: store.shop_domain || shop,
-                state: "",
+                state: "offline",
                 isOnline: false,
                 accessToken: store.shopify_admin_api_token,
                 scope: store.scopes || "",
@@ -84,9 +84,23 @@ export class SupabaseSessionStorage {
     }
 
     async deleteSession(id: string): Promise<boolean> {
-        // Optional: Implement if you want to allow "logout" or uninstall cleanup
-        return true;
+        if (!id.startsWith("offline_")) return true;
+
+        const shop = id.replace("offline_", "");
+
+        const { error } = await supabaseAdmin
+            .from("stores")
+            .update({
+            shopify_admin_api_token: null,
+            scopes: null,
+            updated_at: new Date(),
+            })
+            .eq("shop_domain", shop);
+
+        return !error;
     }
+
+
 
     async deleteSessions(ids: string[]): Promise<boolean> {
         return true;

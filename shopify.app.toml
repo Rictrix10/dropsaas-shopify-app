@@ -2,7 +2,7 @@
 
 client_id = "adc1b15bae96290aba407442c7c7dcff"
 name = "dropsaas-app"
-application_url = "https://measures-writer-photography-plugin.trycloudflare.com"
+application_url = "https://acm-evidence-webpage-lobby.trycloudflare.com"
 embedded = true
 
 [build]
@@ -41,5 +41,5 @@ scopes = "read_fulfillments,read_orders,write_fulfillments,write_orders,write_pr
 
 [auth]
 redirect_urls = [
-  "https://measures-writer-photography-plugin.trycloudflare.com/auth/callback"
+  "https://acm-evidence-webpage-lobby.trycloudflare.com/auth/callback"
 ]

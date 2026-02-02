@@ -3,25 +3,25 @@ import { authenticate } from "../shopify.server";
 import { supabaseAdmin } from "../utils/supabase.server";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { shop, session, topic } = await authenticate.webhook(request);
+  const { shop, topic } = await authenticate.webhook(request);
 
   console.log(`Received ${topic} webhook for ${shop}`);
 
-  // Webhook requests can trigger multiple times and after an app has already been uninstalled.
-  // Se a app foi desinstalada, limpar dados do Supabase
-  if (session) {
-    try {
-      // Opcional: Limpar dados da store do Supabase
-      // await supabaseAdmin
-      //   .from("stores")
-      //   .delete()
-      //   .eq("store_id", shop);
+  try {
+    await supabaseAdmin
+      .from("stores")
+      .update({
+        shopify_admin_api_token: null,
+        scopes: null,
+        updated_at: new Date(),
+      })
+      .eq("shop_domain", shop);
 
-      console.log(`App uninstalled from ${shop}`);
-    } catch (error) {
-      console.error(`Error processing uninstall for ${shop}:`, error);
-    }
+    console.log(`Revoked Shopify access for ${shop}`);
+  } catch (error) {
+    console.error(`Error revoking access for ${shop}:`, error);
   }
 
-  return new Response();
+  return new Response(null, { status: 200 });
 };
+
